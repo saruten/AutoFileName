@@ -1,7 +1,15 @@
 import sublime
 import sublime_plugin
 import os
-from getimageinfo import getImageInfo
+try:
+    from .getimageinfo import getImageInfo
+except (ValueError):
+    from getimageinfo import getImageInfo
+
+
+st_version = 2
+if sublime.version() == '' or int(sublime.version()) > 3000:
+    st_version = 3
 
 
 class InsertDimensionsCommand(sublime_plugin.TextCommand):
@@ -150,9 +158,11 @@ class FileNameComplete(sublime_plugin.EventListener):
 
         try:
             dir_files = os.listdir(this_dir)
-
             for d in dir_files:
-                n = d.decode('utf-8')
+                if st_version == 2:
+                    n = d.decode('utf-8')
+                else:
+                    n = d
                 if n.startswith('.'):
                     continue
                 if not '.' in n:
@@ -162,5 +172,5 @@ class FileNameComplete(sublime_plugin.EventListener):
                 InsertDimensionsCommand.this_dir = this_dir
             return completions
         except OSError:
-            print "AutoFileName: could not find " + this_dir
+            print("AutoFileName: could not find " + this_dir)
             return
